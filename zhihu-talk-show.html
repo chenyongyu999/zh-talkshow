@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>知乎 · 脱口秀场</title>
+<style>
+:root {
+  --bg: #F6F7F9;
+  --card: #FFFFFF;
+  --zhihu-blue: #0084FF;
+  --zhihu-blue-dark: #0066CC;
+  --zhihu-blue-pale: #EBF4FF;
+  --gold: #FFB800;
+  --gold-pale: #FFF6E0;
+  --purple: #7C5CFF;
+  --purple-pale: #F0ECFF;
+  --pink: #FF4D8F;
+  --pink-pale: #FFEEF5;
+  --green: #00B96B;
+  --green-pale: #E6F9F0;
+  --text-primary: #1A1A2E;
+  --text-secondary: #646A7A;
+  --text-tertiary: #9BA1AF;
+  --border: #E8EBF0;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg); color: var(--text-primary);
+  padding-bottom: 90px; -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+
+/* ========== 板块重排：今日热梗 → 爆梗场 → 其他 ========== */
+.top-bar { order: 0; }
+.live-banner { order: 1; }
+.mode-tabs { order: 2; }
+.stage-card { order: 3; }
+.review { order: 4; }
+.mentors { order: 5; }
+.zb-card { order: 6; }
+.streak-bar { order: 7; }
+.level-card { order: 8; }
+
+/* ========== TOP BAR ========== */
+.top-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+}
+.top-bar .logo { font-size: 19px; font-weight: 800; color: var(--zhihu-blue); }
+.top-bar .logo span { color: var(--text-primary); }
+.top-bar .level {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: var(--gold-pale); color: #b07d00;
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+}
+.top-bar .score {
+  background: var(--zhihu-blue-pale); color: var(--zhihu-blue);
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+}
+
+/* ========== LIVE BANNER ========== */
+.live-banner {
+  margin: 12px 12px 0;
+  background: linear-gradient(135deg, #0A1628 0%, #1a0f2e 50%, #2b0f3a 100%);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px; color: #fff; position: relative; overflow: hidden;
+}
+.live-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 30%, rgba(124,92,255,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(255,77,143,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 20%, rgba(255,184,0,0.12) 0%, transparent 45%);
+}
+.live-banner > * { position: relative; z-index: 1; }
+.live-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 12px; border-radius: 12px;
+  background: rgba(255,77,90,0.25); font-size: 11px; font-weight: 700; margin-bottom: 10px;
+}
+.live-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #FF4D5A; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.live-title { font-size: 18px; font-weight: 800; line-height: 1.4; margin-bottom: 6px; }
+.live-topic { font-size: 14px; color: rgba(255,255,255,0.85); margin-bottom: 12px; }
+.live-topic b { color: var(--gold); }
+.live-meta { display: flex; gap: 18px; font-size: 11px; color: rgba(255,255,255,0.6); }
+.live-meta .tick { font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+
+/* ========== MODE TABS ========== */
+.mode-tabs {
+  display: flex; gap: 8px; padding: 12px 12px 0; overflow-x: auto; scrollbar-width: none;
+}
+.mode-tabs::-webkit-scrollbar { display: none; }
+.mode-tab {
+  flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.mode-tab.active {
+  background: var(--zhihu-blue-pale); color: var(--zhihu-blue); border-color: var(--zhihu-blue-pale);
+}
+.mode-tab .tag {
+  font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 800;
+}
+
+/* ========== STAGE CARD ========== */
+.stage-card {
+  margin: 12px; background: var(--card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-md);
+}
+.stage-head {
+  padding: 16px 18px 10px; display: flex; align-items: flex-start; gap: 10px;
+}
+.stage-emoji {
+  width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+  background: var(--zhihu-blue-pale);
+}
+.stage-kicker { font-size: 11px; font-weight: 800; color: var(--zhihu-blue); letter-spacing: 1px; margin-bottom: 3px; }
+.stage-q { font-size: 17px; font-weight: 800; line-height: 1.45; }
+.stage-desc { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+.stage-chip {
+  margin: 4px 18px 10px; display: flex; gap: 8px; flex-wrap: wrap;
+}
+.chip {
+  font-size: 11px; padding: 4px 10px; border-radius: 14px; font-weight: 700;
+}
+.chip.kb { background: var(--purple-pale); color: var(--purple); }
+.chip.identity { background: var(--pink-pale); color: var(--pink); }
+.chip.opener { background: var(--green-pale); color: var(--green); }
+
+.stage-input-area { padding: 4px 18px 16px; }
+textarea.joke-input {
+  width: 100%; min-height: 76px; resize: none;
+  border: 1.5px solid var(--border); border-radius: var(--radius-md);
+  padding: 12px 14px; font-size: 14px; line-height: 1.7;
+  font-family: inherit; outline: none; color: var(--text-primary);
+  background: var(--bg); transition: border-color 0.2s;
+}
+textarea.joke-input:focus { border-color: var(--zhihu-blue); background: #fff; }
+.stage-actions { display: flex; gap: 10px; padding: 0 18px 18px; }
+.btn {
+  flex: 1; border: none; border-radius: 24px; padding: 12px 0;
+  font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--zhihu-blue); color: #fff; box-shadow: 0 4px 14px rgba(0,132,255,0.3); }
+.btn-ghost { background: var(--bg); color: var(--text-secondary); }
+
+/* ========== 看山 · AI 捧哏多轮对话 ========== */
+.kanshan-chat {
+  display: none; margin: 2px 4px 0; flex-direction: column; gap: 10px;
+}
+.kanshan-chat.show { display: flex; animation: runoffIn 0.5s ease-out; }
+.kanshan-bubble { display: flex; gap: 10px; align-items: flex-start; animation: runoffIn 0.45s ease-out; }
+.kanshan-bubble .kb-avatar {
+  flex: none; width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #5b8cff, #8f5bff); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  box-shadow: 0 3px 10px rgba(91,140,255,0.35);
+}
+.kanshan-bubble .kb-text {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px 14px 14px 14px; padding: 10px 12px;
+  font-size: 13px; line-height: 1.7; color: var(--text-primary); max-width: 88%;
+}
+.kanshan-bubble .kb-text b { color: var(--zhihu-blue); }
+.kanshan-bubble .kb-text .turn {
+  font-size: 10px; font-weight: 800; color: var(--text-tertiary);
+  margin-bottom: 5px; letter-spacing: 0.5px;
+}
+.kanshan-next { display: none; flex: 0 1 auto; margin-left: auto; min-width: 168px; padding: 10px 14px !important; font-size: 13px; background: #ff6b35; color: #fff; box-shadow: 0 4px 14px rgba(255,107,53,0.3); }
+.kanshan-next.show { display: block; }
+.kanshan-say {
+  margin-top: 10px; padding: 10px 12px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(91,140,255,0.08), rgba(143,91,255,0.08));
+  border: 1px solid rgba(91,140,255,0.25); font-size: 13px; line-height: 1.8; color: var(--text-secondary);
+}
+.kanshan-say b { color: var(--zhihu-blue); }
+
+/* 演出中的聚光灯遮罩 */
+.stage-card.performing textarea.joke-input,
+.stage-card.performing .stage-actions { opacity: 0.4; pointer-events: none; }
+.spinner {
+  display: none; text-align: center; padding: 8px 0 20px; font-size: 13px; color: var(--text-tertiary);
+}
+.stage-card.performing .spinner { display: block; }
+
+/* ========== 观众反应轨道 ========== */
+.reaction-rail {
+  min-height: 54px; padding: 8px 18px 4px; position: relative; overflow: hidden;
+}
+.reaction-rail .fly {
+  position: absolute; font-size: 26px; animation: flyAcross 1.1s ease-in forwards; pointer-events: none;
+}
+@keyframes flyAcross {
+  0%   { transform: translateY(20px) rotate(-15deg); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(-50px) translateX(180px) rotate(20deg); opacity: 0; }
+}
+.reaction-stats {
+  display: none; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 8px 18px 16px;
+}
+.reaction-stats.show { display: grid; }
+
+/* ========== 跑票投票（奇葩说式） ========== */
+.runoff-wrap {
+  display: none; margin: 4px 18px 6px; padding: 12px 14px;
+  border-radius: var(--radius-md); background: var(--bg);
+}
+.runoff-wrap.show { display: block; animation: runoffIn 0.5s ease-out; }
+@keyframes runoffIn { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+.runoff-head { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin-bottom: 10px; }
+.runoff-stage { display: flex; align-items: center; gap: 10px; }
+.runoff-col { flex: 1; }
+.runoff-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 6px; font-weight: 700; }
+.runoff-row { display: flex; flex-direction: column; gap: 6px; }
+.ro-bad { display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.ro-bad.haha { background: var(--green-pale); color: var(--green); }
+.ro-bad.cold { background: var(--gold-pale); color: #b07d00; }
+.runoff-arrow { font-size: 22px; color: var(--text-tertiary); animation: arrowPulse 0.8s ease-in-out infinite; }
+@keyframes arrowPulse { 0%,100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+.runoff-result { margin-top: 10px; font-size: 12px; line-height: 1.7; color: var(--text-secondary); }
+.runoff-result .moved { font-size: 14px; font-weight: 900; color: var(--zhihu-blue); }
+.runoff-result b.bonus { color: #ff6b35; }
+
+/* ========== 导师席 ========== */
+.mentors {
+  display: none; margin: 0 12px 12px; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px 18px; box-shadow: var(--shadow-md);
+}
+.mentors.show { display: block; animation: runoffIn 0.5s ease-out; }
+.mentors-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; margin-bottom: 12px; }
+.mentor-row { display: flex; gap: 10px; }
+.mentor-card { flex: 1; background: var(--bg); border-radius: var(--radius-md); padding: 12px; }
+.mentor-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mentor-avatar { width: 32px; height: 32px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: var(--shadow-sm); }
+.mentor-name { font-size: 12px; font-weight: 800; }
+.mentor-quote { font-size: 11px; line-height: 1.6; color: var(--text-secondary); min-height: 50px; }
+.mentor-vote { margin-top: 8px; font-size: 11px; font-weight: 800; padding: 5px 10px; border-radius: 12px; text-align: center; }
+.mentor-vote.light { background: var(--gold-pale); color: #b07d00; animation: lightPop 0.4s ease-out; }
+.mentor-vote.no { background: var(--bg); color: var(--text-tertiary); }
+@keyframes lightPop { 0% { transform: scale(1.6) rotate(-6deg); } 100% { transform: scale(1); } }
+
+.rstat {
+  border-radius: var(--radius-md); padding: 12px 8px; text-align: center;
+}
+.rstat .emo { font-size: 26px; }
+.rstat .pct { font-size: 20px; font-weight: 900; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rstat .label { font-size: 10px; color: var(--text-tertiary); margin-top: 1px; }
+.rstat.haha { background: var(--green-pale); } .rstat.haha .pct { color: var(--green); }
+.rstat.absurd { background: var(--purple-pale); } .rstat.absurd .pct { color: var(--purple); }
+.rstat.cold { background: var(--gold-pale); } .rstat.cold .pct { color: #b07d00; }
+
+/* ========== 评审点评 ========== */
+.review {
+  display: none; margin: 0 12px 12px; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px 18px; box-shadow: var(--shadow-md);
+}
+.review.show { display: block; }
+.review-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; margin-bottom: 10px; }
+.review-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--zhihu-blue-pale);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.review-avatar.ai { background: var(--gold-pale); }
+.review-body { font-size: 13px; line-height: 1.8; color: var(--text-secondary); }
+.review-body b { color: var(--text-primary); }
+.score-gain {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--gold-pale); color: #b07d00;
+  font-weight: 900; font-size: 13px; padding: 3px 10px; border-radius: 14px;
+  animation: scorePop 0.5s ease-out;
+}
+@keyframes scorePop { 0% { transform: scale(1.6); } 100% { transform: scale(1); } }
+.review-publish { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.review-publish.show { display: block; }
+.pub-preview {
+  background: var(--bg); border-radius: var(--radius-md); padding: 12px 14px;
+  font-size: 13px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 10px;
+  border-left: 3px solid var(--zhihu-blue);
+}
+.btn-sm {
+  border: none; border-radius: 20px; padding: 8px 18px; font-size: 12px; font-weight: 800;
+  cursor: pointer; font-family: inherit; background: var(--zhihu-blue); color: #fff;
+}
+.btn-sm.pub { background: var(--zhihu-blue); }
+.btn-sm.done { background: var(--green-pale); color: var(--green); }
+
+/* ========== 打卡条 ========== */
+.streak-bar {
+  margin: 12px; background: var(--card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 14px 18px; box-shadow: var(--shadow-sm);
+}
+.streak-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.streak-title { font-size: 13px; font-weight: 800; }
+.streak-title .flame { font-size: 15px; }
+.streak-sub { font-size: 11px; color: var(--text-tertiary); }
+.streak-days { display: flex; gap: 8px; }
+.day {
+  flex: 1; height: 46px; border-radius: 12px; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--text-tertiary); gap: 2px;
+  border: 1px dashed var(--border);
+}
+.day.done { background: var(--gold-pale); border: 1px solid var(--gold); color: #b07d00; }
+.day .day-emo { font-size: 16px; }
+.day .day-label { font-weight: 700; }
+
+/* ========== 段位进度 ========== */
+.level-card {
+  margin: 12px; background: var(--card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 14px 18px; box-shadow: var(--shadow-sm);
+}
+.level-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.level-badge {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #FFB800, #FF7A00);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.level-name { font-size: 15px; font-weight: 800; }
+.level-progress-label { font-size: 11px; color: var(--text-tertiary); }
+.progress-bar { height: 8px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.progress-bar .fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--zhihu-blue), #00B9FF);
+  transition: width 0.6s ease;
+}
+
+/* ========== 自定义命题 ========== */
+.custom-topic-area { display: none; padding: 0 18px 14px; }
+.custom-topic-area.show { display: block; animation: runoffIn 0.4s ease-out; }
+.cta-row { display: flex; gap: 8px; }
+.custom-topic-input {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit; outline: none;
+  color: var(--text-primary); background: var(--bg); transition: border-color 0.2s;
+}
+.custom-topic-input:focus { border-color: var(--zhihu-blue); background: #fff; }
+.cta-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.cta-chip {
+  font-size: 11px; padding: 4px 10px; border-radius: 14px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text-secondary); cursor: pointer; font-family: inherit; font-weight: 700;
+}
+.cta-chip.on { background: var(--zhihu-blue-pale); color: var(--zhihu-blue); border-color: var(--zhihu-blue-pale); }
+
+/* ========== 爆梗特效 ========== */
+.bomb-overlay {
+  position: fixed; inset: 0; z-index: 300; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(255,184,0,0.18), transparent 70%);
+  opacity: 0;
+}
+.bomb-overlay.show { animation: bombFlash 1.5s ease-out forwards; }
+@keyframes bombFlash {
+  0% { opacity: 0; transform: scale(0.6); }
+  15% { opacity: 1; transform: scale(1.12); }
+  35% { transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+.bomb-text {
+  font-size: 62px; font-weight: 900; color: var(--gold);
+  text-shadow: 0 8px 30px rgba(255,150,0,0.6);
+  animation: bombShake 0.28s ease-in-out infinite;
+}
+@keyframes bombShake { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+/* ========== 自由投票 ========== */
+.free-vote { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.free-vote.show { display: block; animation: runoffIn 0.5s ease-out; }
+.fv-head { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px; }
+.fv-btns { display: flex; gap: 8px; }
+.fv-btn {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 10px 0; font-size: 13px; font-weight: 800; cursor: pointer;
+  font-family: inherit; background: var(--bg); transition: all 0.15s;
+}
+.fv-btn:active { transform: scale(0.97); }
+.fv-btn.haha { color: var(--green); } .fv-btn.haha:hover, .fv-btn.haha.voted { background: var(--green-pale); border-color: var(--green); }
+.fv-btn.absurd { color: var(--purple); } .fv-btn.absurd:hover, .fv-btn.absurd.voted { background: var(--purple-pale); border-color: var(--purple); }
+.fv-btn.cold { color: #b07d00; } .fv-btn.cold:hover, .fv-btn.cold.voted { background: var(--gold-pale); border-color: #b07d00; }
+.fv-btn.voted { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+/* ========== 段子排行榜（融入今日热梗 LIVE 板块） ========== */
+.lb-panel {
+  margin-top: 14px; border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.98);
+  padding: 12px 14px 8px; box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+  border-top: 3px solid #FFB800;
+}
+.lb-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lb-title { font-size: 14.5px; font-weight: 900; color: #1a1a2e; }
+.lb-head .lb-sub { font-size: 10px; color: var(--text-tertiary); font-weight: 700; }
+.lb-tabs { margin-left: auto; display: flex; gap: 6px; }
+.lb-tab {
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+  border-radius: 16px; padding: 4px 12px; font-size: 11px; font-weight: 800;
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.lb-tab.active {
+  background: linear-gradient(135deg,#FFB800,#FF8A00); color: #fff; border-color: transparent;
+  box-shadow: 0 2px 8px rgba(255,184,0,0.4);
+}
+.lb-list { margin-top: 6px; }
+.lb-row {
+  display: flex; align-items: center; gap: 10px; padding: 7px 6px;
+  border-bottom: 1px dashed var(--border); border-radius: 10px;
+  animation: lbIn 0.45s ease-out both;
+}
+.lb-row:nth-child(2) { animation-delay: 0.05s; }
+.lb-row:nth-child(3) { animation-delay: 0.1s; }
+.lb-row:nth-child(4) { animation-delay: 0.15s; }
+.lb-row:nth-child(5) { animation-delay: 0.2s; }
+.lb-row:nth-child(6) { animation-delay: 0.25s; }
+.lb-row:nth-child(7) { animation-delay: 0.3s; }
+.lb-row:nth-child(8) { animation-delay: 0.35s; }
+.lb-row:nth-child(9) { animation-delay: 0.4s; }
+.lb-row:nth-child(10) { animation-delay: 0.45s; }
+@keyframes lbIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.lb-row:last-child { border-bottom: none; }
+.lb-row.mine { box-shadow: inset 0 0 0 1.5px var(--gold); background: #EAF4FF; }
+.lb-row.top1 { background: linear-gradient(135deg, #FFF7E0 0%, #FFE9A8 100%); }
+.lb-row.top2 { background: linear-gradient(135deg, #F3F4F7 0%, #E2E5EC 100%); }
+.lb-row.top3 { background: linear-gradient(135deg, #FDEFD8 0%, #F6DCB6 100%); }
+.lb-rank { width: 30px; font-size: 19px; text-align: center; flex-shrink: 0; }
+.lb-main { flex: 1; min-width: 0; }
+.lb-text { font-size: 12.5px; line-height: 1.5; color: #1a1a2e; font-weight: 700; }
+.lb-meta { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+.lb-meta b.bomb { color: #ff6b35; }
+.lb-heatbar { height: 3px; border-radius: 3px; background: rgba(26,26,46,0.08); margin-top: 5px; overflow: hidden; }
+.lb-heatfill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #0084FF, #00C6FF); }
+.lb-heat { font-size: 13px; font-weight: 900; color: #FF8A00; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.lb-empty { text-align: center; padding: 20px 0; color: var(--text-tertiary); font-size: 12px; }
+
+/* ========== 爆梗场 · 知乎回答划线采集 ========== */
+.zb-card {
+  margin: 12px; background: var(--card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 14px 18px; box-shadow: var(--shadow-sm);
+}
+.zb-head { font-size: 14px; font-weight: 800; }
+.zb-head .zb-sub { font-size: 10px; color: var(--text-tertiary); font-weight: 700; margin-left: 6px; }
+.zb-tip {
+  margin: 10px 0; padding: 8px 12px; border-radius: 10px;
+  background: var(--zhihu-blue-pale); border: 1px dashed var(--zhihu-blue);
+  color: var(--zhihu-blue); font-size: 11.5px; font-weight: 700; line-height: 1.7;
+}
+.zhihu-post {
+  margin-top: 10px; border: 1px solid var(--border); border-radius: 12px;
+  background: #fff; overflow: hidden;
+}
+.zhihu-post-head {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 800; color: var(--text-primary);
+  background: linear-gradient(90deg, var(--zhihu-blue-pale), transparent);
+}
+.zhihu-answer { padding: 12px 14px 4px; }
+.zhihu-answer-author { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin-bottom: 6px; }
+.zhihu-answer-author .zh-a-ava {
+  display: inline-flex; width: 20px; height: 20px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--zhihu-blue), #00B9FF); color: #fff;
+  align-items: center; justify-content: center; font-size: 11px; margin-right: 5px;
+  vertical-align: middle;
+}
+.zhihu-answer-text {
+  font-size: 13px; line-height: 1.9; color: var(--text-primary);
+  user-select: text;
+}
+.zhihu-answer-text::selection { background: rgba(0,132,255,0.18); }
+.zhihu-answer-meta {
+  font-size: 10.5px; color: var(--text-tertiary); padding: 8px 0 10px;
+  border-bottom: 1px dashed var(--border); margin-top: 6px;
+}
+.zhihu-answer-text b { color: var(--zhihu-blue); }
+
+/* 知乎蓝底悬浮爆梗按钮 */
+.zh-selection-pop {
+  position: fixed; z-index: 400; display: none;
+  transform: translate(-50%, -100%);
+  background: var(--zhihu-blue); color: #fff; font-size: 12.5px; font-weight: 800;
+  padding: 7px 14px; border-radius: 18px; box-shadow: 0 6px 20px rgba(0,132,255,0.4);
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  animation: popUp 0.2s ease-out;
+}
+.zh-selection-pop::after {
+  content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--zhihu-blue); border-bottom: 0;
+}
+@keyframes popUp { from { opacity: 0; transform: translate(-50%, -85%); } to { opacity: 1; transform: translate(-50%, -100%); } }
+.zh-selection-pop:active { transform: translate(-50%, -100%) scale(0.95); }
+.zh-selection-pop.hidden { display: none !important; }
+
+/* 爆梗场列表 */
+.zb-list { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px; }
+.zb-empty { text-align: center; padding: 18px 0; color: var(--text-tertiary); font-size: 12px; line-height: 1.9; }
+.zb-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.zb-item:last-child { border-bottom: none; }
+.zb-rank { width: 28px; font-size: 17px; text-align: center; flex-shrink: 0; }
+.zb-main { flex: 1; min-width: 0; }
+.zb-text { font-size: 12.5px; line-height: 1.6; color: var(--text-primary); font-weight: 600; }
+.zb-text .zb-quote { color: var(--zhihu-blue); font-weight: 700; }
+.zb-acts { display: flex; gap: 6px; align-items: center; margin-top: 7px; flex-wrap: wrap; }
+.zb-vote {
+  border: 1px solid var(--border); background: var(--bg); border-radius: 14px;
+  padding: 3px 10px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit;
+  color: var(--text-secondary); transition: all 0.15s;
+}
+.zb-vote:active { transform: scale(0.95); }
+.zb-vote.haha:hover, .zb-vote.haha.on { color: var(--green); border-color: var(--green); background: var(--green-pale); }
+.zb-vote.absurd:hover, .zb-vote.absurd.on { color: var(--purple); border-color: var(--purple); background: var(--purple-pale); }
+.zb-vote.cold:hover, .zb-vote.cold.on { color: #b07d00; border-color: #b07d00; background: var(--gold-pale); }
+.zb-use {
+  border: 1px solid var(--zhihu-blue); background: var(--zhihu-blue-pale); color: var(--zhihu-blue);
+  border-radius: 14px; padding: 3px 10px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit;
+}
+.zb-use:active { transform: scale(0.95); }
+.zb-heat { font-size: 13px; font-weight: 900; color: var(--zhihu-blue); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+/* ========== 弹层 ========== */
+#toast {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
+  background: rgba(26,26,46,0.92); color: #fff; padding: 10px 22px;
+  border-radius: 24px; font-size: 13px; opacity: 0; transition: opacity 0.3s;
+  z-index: 200; pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; }
+
+/* 演出时全局聚光灯 */
+body.performing .top-bar, body.performing .mode-tabs,
+body.performing .streak-bar, body.performing .level-card,
+body.performing .live-banner { filter: brightness(0.85); }
+body.performing .stage-card { box-shadow: 0 0 0 6px rgba(255,184,0,0.25), var(--shadow-lg); }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">知乎<span> · 脱口秀场</span> 🎤</div>
+  <div class="score">🎯 积分 <b id="score">0</b></div>
+  <div class="level">🏅 <span id="levelName">冷场新人</span></div>
+</div>
+
+<div class="live-banner">
+  <div class="live-badge"><span class="dot"></span> LIVE 今日场 · 限时 48h</div>
+  <div class="live-title">🔥 今日热梗</div>
+  <div class="live-topic">本期命题：<b id="liveTopic">吐槽一下：周一早上的你</b></div>
+  <div class="live-meta">
+    <span>👀 围观 <b id="spectators">32,846</b> 人</span>
+    <span>⏳ 距结算 <span class="tick" id="countdown">47:59:59</span></span>
+    <span>🔥 已有 <b id="submitted">218</b> 人上场</span>
+  </div>
+
+  <!-- 段子排行榜 · 融入今日热梗板块 -->
+  <div class="lb-panel">
+    <div class="lb-head">
+      <div class="lb-title">🏆 段子排行榜</div>
+      <span class="lb-sub">热度 = 笑果 + 投票加成</span>
+      <div class="lb-tabs">
+        <button class="lb-tab active" data-lb="hot" onclick="lbTab('hot')">🔥 全场热梗</button>
+        <button class="lb-tab" data-lb="mine" onclick="lbTab('mine')">🎯 我的爆梗</button>
+      </div>
+    </div>
+    <div class="lb-list" id="lbList"></div>
+  </div>
+</div>
+
+<div class="mode-tabs">
+  <button class="mode-tab active" data-mode="topic">🔥 今日热梗</button>
+  <button class="mode-tab" data-mode="identity">🎭 身份盲盒</button>
+  <button class="mode-tab" data-mode="opener">🎤 捧哏接梗</button>
+  <button class="mode-tab" data-mode="kb">📚 知识梗擂台</button>
+  <button class="mode-tab" data-mode="custom">✍️ 自定义命题</button>
+</div>
+
+<!-- ============ 舞台 ============ -->
+<div class="stage-card" id="stageCard">
+  <div class="stage-head">
+    <div class="stage-emoji" id="stageEmoji">🔥</div>
+    <div>
+      <div class="stage-kicker" id="stageKicker">今日命题 · 一句话吐槽</div>
+      <div class="stage-q" id="stageQ">吐槽一下：周一早上的你</div>
+      <div class="stage-desc" id="stageDesc">用一句话吐槽本周命题，越离谱越好，观众来投票</div>
+    </div>
+  </div>
+  <div class="stage-chip" id="stageChips"></div>
+
+  <!-- 看山 · AI 捧哏多轮对话 -->
+  <div class="kanshan-chat" id="kanshanChat"></div>
+
+  <!-- 自定义命题：我的舞台我做主 -->
+  <div class="custom-topic-area" id="customTopicArea">
+    <div class="cta-row">
+      <input class="custom-topic-input" id="customTopicInput" maxlength="30"
+             placeholder="输入你自己的命题，比如：吐槽一下：周五下午 4 点 59 分的我">
+      <button class="btn-sm" onclick="addCustomTopic()">✍️ 设定</button>
+    </div>
+    <div class="cta-chips" id="customTopicChips"></div>
+  </div>
+
+  <div class="stage-input-area">
+    <textarea class="joke-input" id="jokeInput" placeholder="来，说一个段子…（30 秒内想不出来就点『看个示范』）"></textarea>
+  </div>
+  <div class="spinner">🎭 聚光灯已就位，全场安静——你开始表演…</div>
+  <div class="stage-actions">
+    <button class="btn btn-ghost" onclick="showExample()">💡 看个示范</button>
+    <button class="btn kanshan-next" id="kanshanNextBtn" onclick="kanshanNext()">🎤 接住看山的梗 · 再来一轮</button>
+    <button class="btn btn-primary" onclick="deliver()">🎤 上场！</button>
+  </div>
+
+  <!-- 观众反应 -->
+  <div class="reaction-rail" id="reactionRail"></div>
+
+  <!-- 奇葩说式跑票投票 -->
+  <div class="runoff-wrap" id="runoffWrap">
+    <div class="runoff-head">🗳️ 奇葩说式投票 · 现场 100 位评审（可随时跑票）</div>
+    <div class="runoff-stage">
+      <div class="runoff-col">
+        <div class="runoff-label">🎬 赛前押注</div>
+        <div class="runoff-row">
+          <span class="ro-bad haha">😂 押好笑 <b id="roPreHaha">0</b></span>
+          <span class="ro-bad cold">🥶 押冷场 <b id="roPreCold">0</b></span>
+        </div>
+      </div>
+      <div class="runoff-arrow">➡️</div>
+      <div class="runoff-col">
+        <div class="runoff-label">🏁 终局投票</div>
+        <div class="runoff-row">
+          <span class="ro-bad haha">😂 好笑 <b id="roPostHaha">0</b></span>
+          <span class="ro-bad cold">🥶 冷场 <b id="roPostCold">0</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="runoff-result" id="runoffResult"></div>
+  </div>
+
+  <div class="reaction-stats" id="reactionStats">
+    <div class="rstat haha"><div class="emo">😂</div><div class="pct" id="pctHaha">0%</div><div class="label">哈哈 · 大众爆笑</div></div>
+    <div class="rstat absurd"><div class="emo">🤡</div><div class="pct" id="pctAbsurd">0%</div><div class="label">离谱 · 强行好笑</div></div>
+    <div class="rstat cold"><div class="emo">🥶</div><div class="pct" id="pctCold">0%</div><div class="label">冷场 · 全场沉默</div></div>
+  </div>
+</div>
+
+<!-- 评审点评 + 内容反哺 -->
+<div class="review" id="review">
+  <div class="review-head">
+    <div class="review-avatar ai">🎙️</div>
+    <div style="flex:1">看山评审团 · 笑点结构检测</div>
+    <span class="score-gain" id="scoreGain">+0 积分</span>
+  </div>
+  <div class="review-body" id="reviewBody"></div>
+  <!-- 观众自由投票：你这一票计入段子排行榜 -->
+  <div class="free-vote" id="freeVote">
+    <div class="fv-head">🗳️ 观众自由投票 · 你这一票决定它上不上热梗榜</div>
+    <div class="fv-btns">
+      <button class="fv-btn haha" data-vote="haha" onclick="freeVote('haha')">😂 好笑</button>
+      <button class="fv-btn absurd" data-vote="absurd" onclick="freeVote('absurd')">🤡 离谱</button>
+      <button class="fv-btn cold" data-vote="cold" onclick="freeVote('cold')">🥶 冷场</button>
+    </div>
+  </div>
+  <div class="review-publish" id="publishArea">
+    <div class="pub-preview" id="pubPreview"></div>
+    <button class="btn-sm pub" onclick="publishJoke()">🚀 一键发布成知乎想法</button>
+  </div>
+</div>
+
+<!-- 导师评审团 -->
+<div class="mentors" id="mentors">
+  <div class="mentors-head">👑 导师评审团 · 一键爆灯</div>
+  <div class="mentor-row" id="mentorRow"></div>
+</div>
+
+<!-- 打卡 -->
+<div class="streak-bar">
+  <div class="streak-head">
+    <div class="streak-title"><span class="flame">🔥</span> 每日一笑 · 连续打卡</div>
+    <div class="streak-sub">连续 7 天解锁限定徽章「段子永动机」</div>
+  </div>
+  <div class="streak-days" id="streakDays"></div>
+</div>
+
+<!-- 段位进度 -->
+<div class="level-card">
+  <div class="level-row">
+    <div class="level-badge" id="levelBadge">🥶</div>
+    <div style="flex:1">
+      <div class="level-name" id="levelName2">冷场新人</div>
+      <div class="level-progress-label" id="levelProgress">再赚 100 分晋升「段子学徒」</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="fill" id="levelFill" style="width:0%"></div></div>
+</div>
+
+<!-- 爆梗场 · 知乎回答划线采集 -->
+<div class="zb-card">
+  <div class="zb-head">💥 爆梗场 <span class="zb-sub">划线知乎回答 → 蓝标收录 → 进榜可投可作命题</span></div>
+  <div class="zb-tip">✍️ 在下方知乎回答里<b>按住鼠标划线选中</b>一句神回复，上方会弹出蓝色<b>「💥 收录为爆梗」</b>按钮，点击即可收入爆梗场。</div>
+
+  <div class="zhihu-post">
+    <div class="zhihu-post-head">📌 知乎 · 问题「有哪些一句话就让人破防的瞬间？」</div>
+    <div class="zhihu-answer">
+      <div class="zhihu-answer-author"><span class="zh-a-ava">高</span>高赞答主</div>
+      <div class="zhihu-answer-text">周五下午 4 点 59 分，我收到了周一的会议邀请。<b>那一刻我明白了：生活不是马拉松，是老板给你画的圈，你跑到终点发现他又画了一个。</b>破防就在一瞬间，比如刚领了工资，发现还没捂热就全给了花呗。</div>
+      <div class="zhihu-answer-meta">赞同 3.2w · 评论 1,204 · 收藏 8,771</div>
+    </div>
+  </div>
+
+  <div class="zhihu-post">
+    <div class="zhihu-post-head">📌 知乎 · 问题「你见过最荒诞的职场行为是什么？」</div>
+    <div class="zhihu-answer">
+      <div class="zhihu-answer-author"><span class="zh-a-ava">无</span>匿名用户</div>
+      <div class="zhihu-answer-text">老板为了证明公司「扁平化」，把全员拉进一个群，然后自己每天都在群里<b>「扁平」地躺平</b>。我们开会 4 小时，结论是「下周再开一次会讨论怎么开会」。<b>加班不是因为活多，是因为白天都用来开会证明自己很忙。</b></div>
+      <div class="zhihu-answer-meta">赞同 1.8w · 评论 856 · 收藏 3,210</div>
+    </div>
+  </div>
+
+  <div class="zhihu-post">
+    <div class="zhihu-post-head">📌 知乎 · 问题「当代年轻人为什么越来越不想上班？」</div>
+    <div class="zhihu-answer">
+      <div class="zhihu-answer-author"><span class="zh-a-ava">摸</span>摸鱼冠军</div>
+      <div class="zhihu-answer-text">上班的本质是：<b>用命换钱，然后用钱续命，最后发现钱不够续命，命也不够换钱。</b>每天挤地铁 2 小时，就为了在工位上坐着刷 8 小时手机，中间穿插 1 小时假装工作。<b>我的工资不是发给我的，是发给「上班」这件事本身的。</b></div>
+      <div class="zhihu-answer-meta">赞同 2.7w · 评论 1,982 · 收藏 5,340</div>
+    </div>
+  </div>
+
+  <div class="zhihu-post">
+    <div class="zhihu-post-head">📌 知乎 · 问题「如何用一句话总结 2026 年的你？」</div>
+    <div class="zhihu-answer">
+      <div class="zhihu-answer-author"><span class="zh-a-ava">孤</span>打工狗一只</div>
+      <div class="zhihu-answer-text">年初我许愿「今年一定发财」，年底发现<b>愿望实现了一半——「发」了，发际线。</b>体检报告比我的年终总结还厚，唯一的好消息是：<b>我的发际线，比我的存款退得还快，至少它还有变化。</b></div>
+      <div class="zhihu-answer-meta">赞同 5.1w · 评论 3,207 · 收藏 12,660</div>
+    </div>
+  </div>
+
+  <div class="zb-list" id="zbList"></div>
+</div>
+
+<!-- 爆梗特效 -->
+<div class="bomb-overlay" id="bombOverlay"><div class="bomb-text">💥 爆梗！</div></div>
+
+<!-- 知乎蓝底划线爆梗按钮 -->
+<div class="zh-selection-pop" id="zhSelPop">💥 收录为爆梗</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   知乎 · 脱口秀场
+   逻辑移植自「辩论场」：
+   快问快辩→今日热梗 / 观点盲盒→身份盲盒 / 看山挑战你→捧哏接梗
+   知识库擂台→知识梗擂台 / 大众评审+AI评审→观众反应+结构检测
+   ============================================================ */
+
+const $ = id => document.getElementById(id);
+
+/* ---------- 数据：四种模式的命题池 ---------- */
+const TOPICS = [
+  { emoji:'⏰', kicker:'今日命题 · 一句话吐槽', topic:'吐槽一下：周一早上的你',
+    desc:'一句话吐槽，越离谱越好，观众来投票',
+    example:'周一的我：被闹钟吵醒，灵魂还在床上，肉体已经去挤地铁了，分裂得比细胞分裂还快。',
+    words:['周一','灵魂','肉体'] },
+  { emoji:'🎉', kicker:'今日命题 · 一句话吐槽', topic:'解释：为什么周五晚上是全宇宙最快乐的时刻',
+    desc:'一句话解释这个宇宙真理',
+    example:'因为周五晚上的我，既是已经下班的打工人，又是还没到账的周末，双重人格叠加，快乐到失真。',
+    words:['周五','下班','周末'] },
+  { emoji:'🤝', kicker:'今日命题 · 一句话吐槽', topic:'安慰一下：加班到 12 点的朋友',
+    desc:'用一句话安慰加班的朋友，注意是安慰不是补刀',
+    example:'别难过，你加班省下的电费，够你明天买杯奶茶续命——恭喜你，用生命换了一杯糖水。',
+    words:['加班','奶茶','续命'] },
+  { emoji:'🗣️', kicker:'今日命题 · 一句话吐槽', topic:'吐槽：开会时老板的「我再补充两句」',
+    desc:'当老板说出这句咒语，时间就停止了',
+    example:'老板的「补充两句」比我的减肥计划还持久，我看了眼表，刚才还是白天，补充完已经是深夜了。',
+    words:['老板','开会','时间'] },
+  { emoji:'❓', kicker:'今日命题 · 一句话吐槽', topic:'解释：为什么对象总说「随便」',
+    desc:'一句「随便」背后，是一场正在酝酿的风暴',
+    example:'「随便」的意思是：我已经想好了答案，但你得猜对，猜错了今晚就睡客厅，这是人类史上最残酷的密室逃脱。',
+    words:['随便','对象','猜'] },
+  { emoji:'🍔', kicker:'今日命题 · 一句话吐槽', topic:'吐槽：减肥时的自己',
+    desc:'每个减肥的人，身体里都住着两个灵魂',
+    example:'减肥第一天的我：今天开始只吃草！减肥第一天的深夜：这棵草，我想给它加个牛肉和芝士。',
+    words:['减肥','深夜','吃'] },
+];
+
+const IDENTITIES = [
+  { emoji:'💻', name:'程序员', example:'我的代码能跑就行，就像我的发际线，退一步海阔天空。',
+    desc:'你现在是一位程序员，用你的职业身份讲一个段子' },
+  { emoji:'📋', name:'产品经理', example:'我们产品的逻辑是：用户想要什么，我们不做什么；用户不想要什么，我们全都做。',
+    desc:'你现在是一位产品经理，用你的职业身份讲一个段子' },
+  { emoji:'👩‍🏫', name:'小学老师', example:'我教了二十年书，终于明白：孩子的想象力是无限的，作业的想象力也是无限的——他们总能写出我没想到的答案。',
+    desc:'你现在是一位小学老师，用你的职业身份讲一个段子' },
+  { emoji:'🛵', name:'外卖小哥', example:'我们送外卖最怕的不是迟到，是顾客备注写「不辣」，然后问为什么汤是辣的——备注是给我看的，辣是命运的安排。',
+    desc:'你现在是一位外卖小哥，用你的职业身份讲一个段子' },
+  { emoji:'💼', name:'打工人', example:'我的工资条和我的头发一样：月初看得到厚度，月底只剩下悲伤。',
+    desc:'你现在是一位资深打工人，用你的职业身份讲一个段子' },
+  { emoji:'🦷', name:'牙医', example:'我最怕的病人是那种「牙疼的时候发誓再也不吃糖，好了之后立刻原谅一切」的，比我见过的所有复读机都循环。',
+    desc:'你现在是一位牙医，用你的职业身份讲一个段子' },
+  { emoji:'💪', name:'健身教练', example:'学员问我怎么才能练出腹肌，我说你先把那层「临时腹肌」减掉，他说那不是腹肌是护心毛。',
+    desc:'你现在是一位健身教练，用你的职业身份讲一个段子' },
+  { emoji:'👨‍🍳', name:'食堂阿姨', example:'打菜的标准动作是抖三下，我们食堂的土豆烧肉，肉和土豆一起失踪，只剩下油——营养学上这叫「全素主义」。',
+    desc:'你现在是一位食堂阿姨，用你的职业身份讲一个段子' },
+];
+
+const OPENERS = [
+  { emoji:'🩺', opener:'医生说我这个病啊，得——', example:'得戒奶茶、戒熬夜、戒加班，我听完差点当场病发：这哪是医嘱，这是遗言。',
+    desc:'看山递给你一个梗的开头，你必须接住，把包袱抖出来' },
+  { emoji:'🐱', opener:'我家猫今天突然说了一句人话：', example:'「你铲屎的时候能不能别玩手机？」——我当场愣住，原来它不说话，是嫌我不配跟它聊天。',
+    desc:'看山递给你一个梗的开头，你必须接住，把包袱抖出来' },
+  { emoji:'💼', opener:'面试官问我最大的缺点是什么，我说：', example:'「我的缺点是对工作太认真了。」面试官当场脸绿了，说这是优点，我说我知道，所以我连缺点都是编的。',
+    desc:'看山递给你一个梗的开头，你必须接住，把包袱抖出来' },
+  { emoji:'👩', opener:'我妈催婚的时候说了一句话，我到现在都忘不了：', example:'「隔壁王阿姨的女儿，跟你一样大，人家孩子都会打酱油了，你连男朋友都打不来。」——妈，打酱油和打男朋友是两门技术。',
+    desc:'看山递给你一个梗的开头，你必须接住，把包袱抖出来' },
+  { emoji:'🛒', opener:'去超市结账，收银员问我有没有会员，我说：', example:'「有，我是你的「脸熟会员」，每周都来，跟上班一样准时。」收银员说：那你这个月全勤奖有了。',
+    desc:'看山递给你一个梗的开头，你必须接住，把包袱抖出来' },
+];
+
+const KB_TOPICS = [
+  { emoji:'🤖', words:['赛博朋克','韭菜','KPI'], example:'现在的公司赛博朋克到什么程度？白天上班当韭菜，晚上回家用 KPI 给自己上香。',
+    desc:'必须用上所有限定词（下方紫色标签），缺一个都算输' },
+  { emoji:'⚛️', words:['量子力学','老板','摸鱼'], example:'我发现老板的视力是量子态的：你不摸鱼他看你，你一摸鱼他量子塌缩，直接闪现到你身后。',
+    desc:'必须用上所有限定词（下方紫色标签），缺一个都算输' },
+  { emoji:'💰', words:['比特币','房贷','梦想'], example:'我的梦想就像比特币：年轻的时候觉得会涨到天上去，现在每个月都在为它流血，还得按时交月供。',
+    desc:'必须用上所有限定词（下方紫色标签），缺一个都算输' },
+  { emoji:'🥚', words:['蛋白质','健身房','夜宵'], example:'健身教练说增肌要补充蛋白质，于是我办了卡、买了粉、练了两天，最后在夜宵摊完成了全部补充。',
+    desc:'必须用上所有限定词（下方紫色标签），缺一个都算输' },
+];
+
+/* ---------- 评价库 ---------- */
+const PRAISE = [
+  '结构检测：铺垫 → 转折 → 爆点，一气呵成。台下有人把奶茶笑喷了，评委团当场加戏。',
+  '这个梗的「误解」层次非常高级，属于懂的人会心一笑、不懂的人强行跟着笑系列。',
+  '包袱抖得干净利落，停顿和节奏都很专业，你上辈子是不是说过相声？',
+  '全场爆笑率 98%，有观众笑到拍桌子把手机拍碎了——建议出周边。',
+  '这波是「意料之外，情理之中」，笑点密度堪比郭德纲的返场。',
+];
+const MEDIUM = [
+  '结构上有一处转折，但爆点稍显含蓄。观众反应：礼貌微笑 + 点头，属于「懂梗但不够炸」。',
+  '梗是好梗，就是包袱裹得有点紧，建议再抖一次，把爆点放出来。',
+  '铺垫可以，转折有了，爆点像被猫叼走了一半。再接再厉，差一步封神。',
+  '全场 6 成观众笑了，剩下 4 成在憋——他们是在等你放大招，可惜大招还在冷却。',
+];
+const COLD = [
+  '全场安静了……能听到头顶上乌鸦飞过的声音。看山给你递上一个救场梗：💡「要不要用『但是』重新反转一次？」',
+  '冷场不可怕，可怕的是你冷场完还自己先笑了。这个梗埋得太深，建议挖出来晒一晒。',
+  '观众沉默三秒后，开始低头看手机——不是嘲讽你，是在搜「这个梗笑点在哪」。',
+  '建议重来一局。记住：脱口秀的秘诀是「转折」和「意外」，不是把实话再说一遍。',
+];
+const TRANSFER = '检测到你的段子笑点密度达标，已生成可发布的知乎想法草稿 ↓ 一键发布，段子直接变成你的内容资产。';
+
+/* ---------- 段位体系 ---------- */
+const LEVELS = [
+  { name:'冷场新人', emo:'🥶', min:0,    next:'段子学徒' },
+  { name:'段子学徒', emo:'🧑‍🎓', min:100, next:'气氛组组长' },
+  { name:'气氛组组长', emo:'🎉', min:300, next:'幽默大师' },
+  { name:'幽默大师', emo:'🃏', min:600,  next:'脱口秀之王' },
+  { name:'脱口秀之王', emo:'👑', min:1000, next:null },
+];
+
+/* ---------- 状态 ---------- */
+let score = parseInt(localStorage.getItem('ts_score') || '0');
+let streak = parseInt(localStorage.getItem('ts_streak') || '0');
+let lastPlayDate = localStorage.getItem('ts_lastdate') || '';
+let currentMode = 'topic';
+let currentData = TOPICS[0];
+let currentJoke = '';
+
+/* 看山捧哏多轮状态 */
+let kanshanRound = 0;      // 已接梗轮数（0~3）
+let kanshanJokes = [];     // 每轮接住的段子
+
+/* 自定义命题 */
+let customTopics = JSON.parse(localStorage.getItem('ts_custom_topics') || '[]');
+
+/* 段子排行榜 + 自由投票 */
+let lb = JSON.parse(localStorage.getItem('ts_leaderboard') || '[]');
+let lastEntryId = null;    // 当前段子在排行榜里的 id
+let lbTabNow = 'hot';      // 当前排行榜 tab：hot / mine
+
+/* 爆梗场：知乎划线收录 */
+let zhihuBombs = JSON.parse(localStorage.getItem('ts_zhihu_bombs') || '[]'); // 收录的爆梗
+let selPopText = '';       // 当前划线选中的文本
+let selPopAnchor = null;   // 划线按钮定位锚点
+
+/* 种子热梗（内置，撑起排行榜氛围） */
+const SEED_LB = [
+  { id:'seed1', text:'周一的我：被闹钟吵醒，灵魂还在床上，肉体已经去挤地铁了，分裂得比细胞分裂还快。', haha:88, mode:'topic', votes:{haha:1024, absurd:87, cold:12}, mine:false },
+  { id:'seed2', text:'老板的「补充两句」比我的减肥计划还持久，我看了眼表，刚才还是白天，补充完已经是深夜了。', haha:79, mode:'topic', votes:{haha:866, absurd:203, cold:41}, mine:false },
+  { id:'seed3', text:'我的代码能跑就行，就像我的发际线，退一步海阔天空。', haha:74, mode:'identity', votes:{haha:652, absurd:98, cold:30}, mine:false },
+  { id:'seed4', text:'「随便」的意思是：我已经想好了答案，但你得猜对，猜错了今晚就睡客厅，这是人类史上最残酷的密室逃脱。', haha:81, mode:'topic', votes:{haha:731, absurd:156, cold:25}, mine:false },
+  { id:'seed5', text:'我发现老板的视力是量子态的：你不摸鱼他看你，你一摸鱼他量子塌缩，直接闪现到你身后。', haha:85, mode:'kb', votes:{haha:920, absurd:177, cold:18}, mine:false },
+];
+
+/* ---------- 初始化 ---------- */
+function init() {
+  updateScoreBar();
+  renderStreak();
+  setMode('topic', false);
+  renderLevel();
+  renderLeaderboard();
+  renderZbList();
+  // 知乎划线按钮点击 → 收录爆梗
+  $('zhSelPop').addEventListener('click', collectZhihuBomb);
+  // 倒计时
+  const now = new Date();
+  const end = new Date(now); end.setHours(now.getHours() + 48, 0, 0, 0);
+  countdownTo(end);
+}
+function countdownTo(end) {
+  const tick = () => {
+    let d = Math.max(0, end - Date.now());
+    const h = String(Math.floor(d/3600000)).padStart(2,'0');
+    const m = String(Math.floor(d/60000)%60).padStart(2,'0');
+    const s = String(Math.floor(d/1000)%60).padStart(2,'0');
+    $('countdown').textContent = `${h}:${m}:${s}`;
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+/* ---------- 模式切换 ---------- */
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => setMode(tab.dataset.mode, true));
+});
+function setMode(mode, animate) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  if (mode === 'custom') {
+    // 自定义命题：从用户创建的命题池里随机挑一个（没有就先占位）
+    currentData = customTopics.length
+      ? customTopics[Math.floor(Math.random() * customTopics.length)]
+      : { emoji:'✍️', kicker:'自定义命题', topic:'（先输入你的命题）', desc:'在下方输入你想要的命题，再设定上场', example:'', words:[], custom:false };
+  } else {
+    const pools = { topic: TOPICS, identity: IDENTITIES, opener: OPENERS, kb: KB_TOPICS };
+    const pool = pools[mode];
+    currentData = pool[Math.floor(Math.random() * pool.length)];
+  }
+  renderStage();
+  // 重置结果区
+  $('reactionStats').classList.remove('show');
+  $('review').classList.remove('show');
+  $('reactionRail').innerHTML = '';
+  $('publishArea').classList.remove('show');
+  if (animate) showToast('已切换模式，聚光灯已就位 🎭');
+}
+function renderStage() {
+  $('stageEmoji').textContent = currentData.emoji;
+  $('stageKicker').textContent = modeKicker();
+  $('stageDesc').textContent = currentData.desc;
+  const chips = $('stageChips');
+  chips.innerHTML = '';
+  if (currentMode === 'kb') {
+    currentData.words.forEach(w => {
+      const c = document.createElement('span');
+      c.className = 'chip kb'; c.textContent = '必备词 · ' + w;
+      chips.appendChild(c);
+    });
+  } else if (currentMode === 'identity') {
+    const c = document.createElement('span');
+    c.className = 'chip identity'; c.textContent = '身份 · ' + currentData.name;
+    chips.appendChild(c);
+  } else if (currentMode === 'opener') {
+    const c = document.createElement('span');
+    c.className = 'chip opener'; c.textContent = '开场 · ' + currentData.opener;
+    chips.appendChild(c);
+  }
+  if (currentMode === 'opener') {
+    $('stageQ').textContent = currentData.opener;
+    $('jokeInput').placeholder = '接着往下说…';
+  } else if (currentMode === 'custom') {
+    $('stageQ').textContent = currentData.topic;
+    $('jokeInput').placeholder = currentData.custom ? '为你的命题写一句段子…' : '先在上方输入并设定你的命题…';
+  } else {
+    $('stageQ').textContent = currentData.topic || ('用「' + currentData.name + '」的身份讲个段子');
+    $('jokeInput').placeholder = '来，说一个段子…（30 秒内想不出来就点『看个示范』）';
+  }
+  $('jokeInput').value = '';
+  currentJoke = '';
+  $('liveTopic').textContent = currentMode === 'topic' ? currentData.topic : modeTitle();
+
+  // 自定义命题区：仅自定义模式显示
+  const cta = $('customTopicArea');
+  if (currentMode === 'custom') { cta.classList.add('show'); renderCustomChips(); }
+  else cta.classList.remove('show');
+
+  // 看山对话初始化：看山全程在线（捧哏递梗 + 全模式自动评论）
+  $('kanshanNextBtn').classList.remove('show');
+  kanshanRound = 0;
+  kanshanJokes = [];
+  $('kanshanChat').innerHTML = '';
+  $('kanshanChat').classList.add('show');
+  if (currentMode === 'opener') {
+    addKanshanBubble(`看山把开场递到你手里：<b>「${currentData.opener}」</b><br><br>接住它，把包袱抖出来。这一路看山会追问到底——你抛梗，看山接，梗不能断在半路。`, '第 1 轮 · 看山递梗');
+  } else {
+    addKanshanBubble('看山已就位。这一场，你讲段子，看山负责「自动评论」——专业的损，不留情面。', '看山 · 自动评论');
+  }
+}
+function modeKicker() {
+  return { topic:'今日命题 · 一句话吐槽', identity:'身份盲盒 · 打开你的隐藏身份',
+           opener:'看山递梗 · 你必须接住', kb:'知识梗擂台 · 限定词编段子',
+           custom:'自定义命题 · 我的舞台我做主' }[currentMode];
+}
+function modeTitle() {
+  return { topic:'今日热梗', identity:'身份盲盒', opener:'捧哏接梗', kb:'知识梗擂台', custom:'自定义命题' }[currentMode];
+}
+
+/* ---------- 示范 ---------- */
+function showExample() {
+  if (currentMode === 'custom') { showToast('自定义命题没有示范——这正是它的意义，全靠你 ✍️'); return; }
+  $('jokeInput').value = currentData.example;
+  currentJoke = currentData.example;
+  showToast('示范已填好，直接上场试试 🎬');
+}
+
+/* ---------- 上场！ ---------- */
+function deliver() {
+  const input = $('jokeInput').value.trim();
+  if (!input) { showToast('先写一句段子再上场，或者点「看个示范」😉'); return; }
+  if (currentMode === 'custom' && !currentData.custom) {
+    showToast('先在上方输入并「✍️ 设定」你的命题，再上场 🎯');
+    $('customTopicInput').focus();
+    return;
+  }
+  currentJoke = input;
+
+  // 捧哏模式：看山追问未完 → 进入接梗回合（点评+追问，先不结算）
+  if (currentMode === 'opener' && kanshanRound < 3) { kanshanRoundUp(input); return; }
+  finalizeShow(input);
+}
+
+/* ---------- 完整结算（跑票 / 导师 / 看山结构点评） ---------- */
+function finalizeShow(input) {
+  // 演出中
+  const card = $('stageCard');
+  card.classList.add('performing');
+  document.body.classList.add('performing');
+  $('reactionRail').innerHTML = '';
+  $('reactionStats').classList.remove('show');
+  $('runoffWrap').classList.remove('show');
+  $('mentors').classList.remove('show');
+  $('kanshanNextBtn').classList.remove('show');
+  $('review').classList.remove('show');
+  $('freeVote').classList.remove('show');
+  document.querySelectorAll('.fv-btn').forEach(b => b.classList.remove('voted'));
+
+  // 看山 · 演出中自动吐槽
+  setTimeout(() => addKanshanBubble(pick(PERF_TALKS), '看山 · 自动评论'), 350);
+
+  setTimeout(() => {
+    card.classList.remove('performing');
+    document.body.classList.remove('performing');
+
+    // 分析段子
+    const res = analyze(input);
+
+    // 💥 爆梗时刻：笑果达标触发全场特效
+    const bomb = res.haha >= 62;
+    if (bomb) bombMoment(res.haha);
+
+    // 观众反应飞入
+    spawnReactions(res);
+
+    // 奇葩说式跑票投票：赛前押注 → 终局投票
+    const vote = runoffVote(res.haha);
+    showRunoff(vote);
+
+    // 导师评审：毒舌 / 共情 / 逻辑 + 一键爆灯
+    const mentors = mentorJudges(res.haha);
+    renderMentors(mentors);
+
+    // 统计展示
+    $('pctHaha').textContent = res.haha + '%';
+    $('pctAbsurd').textContent = res.absurd + '%';
+    $('pctCold').textContent = res.cold + '%';
+    $('reactionStats').classList.add('show');
+
+    // 看山 · 赛后自动快评（反应 / 跑票 / 爆灯连环吐槽）
+    const lightCount = mentors.filter(m => m.light).length;
+    kanshanAutoComments(res, vote, lightCount);
+
+    // 积分 & 点评：基础分 + 跑票分 + 爆灯加成 + 看山接梗加成
+    const runBonus = Math.round(vote.moved * 0.6);
+    const lightBonus = lightCount * 30;
+    const catchBonus = currentMode === 'opener' ? (kanshanJokes.length >= 3 ? 20 : kanshanJokes.length * 6) : 0;
+    const bombBonus = bomb ? (res.haha >= 75 ? 50 : 30) : 0;   // 💥 爆梗加成
+    const gain = res.gain + runBonus + lightBonus + catchBonus + bombBonus;
+    score += gain;
+    localStorage.setItem('ts_score', String(score));
+    updateScoreBar();
+    const gainEl = $('scoreGain');
+    gainEl.textContent = '+'+gain+' 积分';
+    gainEl.style.animation = 'none'; void gainEl.offsetWidth; gainEl.style.animation = '';
+    $('reviewBody').innerHTML = res.comment +
+      `<div class="kanshan-say">🎙️ <b>看山</b>：${kanshanSay(res, vote, lightCount)}</div>` +
+      `<br><b>🗳️ 跑票 ${vote.moved} 人（跑票分 +${runBonus}）</b> · <b>🧨 爆灯 ×${lightCount}（+${lightBonus}）</b>` +
+      (catchBonus ? ` · <b>🎤 看山接梗 ×${kanshanJokes.length}（+${catchBonus}）</b>` : '') +
+      (bombBonus ? ` · <b>💥 爆梗（+${bombBonus}）</b>` : '') +
+      ` · 本场合计 <b>+${gain}</b> 积分`;
+    $('review').classList.add('show');
+
+    // 记录进段子排行榜 + 开放自由投票
+    recordJoke(input, res);
+    $('freeVote').classList.add('show');
+
+    // 内容反哺：高笑点可发布
+    if (res.haha >= 55) {
+      $('pubPreview').textContent = '【随手一梗 · 来自脱口秀场】' + input;
+      $('publishArea').classList.add('show');
+    } else {
+      $('publishArea').classList.remove('show');
+    }
+
+    // 打卡
+    checkStreak();
+
+    // 围观人数 +1
+    const sp = parseInt($('spectators').textContent.replace(/,/g,'')) + 1;
+    $('spectators').textContent = sp.toLocaleString();
+    $('submitted').textContent = (parseInt($('submitted').textContent)+1);
+  }, 1200);
+}
+
+/* ============================================================
+   看山 · AI 捧哏核心：接梗回合 + 苏格拉底式追问
+   每接一轮，看山基于结构特征递新梗逼你升级
+   ============================================================ */
+function kanshanRoundUp(input) {
+  kanshanJokes.push(input);
+  kanshanRound++;
+
+  // 轻量观众反应 + 结构分析
+  const r = analyze(input);
+  spawnReactions(r);
+
+  // 看山 · 接梗自动吐槽
+  addKanshanBubble(pick(ROUND_TALKS[kanshanRound === 1 ? 'first' : kanshanRound === 2 ? 'second' : 'third']), '看山 · 自动评论');
+
+  const prod = pickKanshanProd(r);
+  addKanshanBubble(`你接的是：<b>「${input.length > 42 ? input.slice(0, 42) + '…' : input}」</b><br><br>${prod}`,
+    `看山 · 第 ${kanshanRound} 轮点评`);
+
+  if (kanshanRound >= 3) {
+    const catchPct = Math.min(100, 45 + Math.round(r.haha / 2));
+    addKanshanBubble(`三连接梗达成，梗没断在半路。接梗达成度 <b>${catchPct}%</b>，看山不再追问——<b>开始结算！</b> 🎬`,
+      '看山 · 结算预备');
+    $('kanshanNextBtn').classList.remove('show');
+    $('jokeInput').value = '';
+    finalizeShow(input);
+  } else {
+    $('kanshanNextBtn').classList.add('show');
+    $('jokeInput').value = '';
+    $('jokeInput').placeholder = '看山把梗抛回来了，接住它，再补一刀…';
+    $('jokeInput').focus();
+  }
+}
+
+function kanshanNext() {
+  $('jokeInput').value = '';
+  $('jokeInput').focus();
+  showToast('看山把梗抛回来了，接住再上场 🎤');
+}
+
+/* 看山气泡 */
+function addKanshanBubble(html, turn) {
+  const chat = $('kanshanChat');
+  const b = document.createElement('div');
+  b.className = 'kanshan-bubble';
+  b.innerHTML = `<div class="kb-avatar">🎙️</div>
+    <div class="kb-text">${turn ? `<div class="turn">${turn}</div>` : ''}${html}</div>`;
+  chat.appendChild(b);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ============================================================
+   看山 · 自动评论系统
+   看山全程在线：演出中吐槽 / 接梗吐槽 / 赛后快评 / 跑票观察 / 爆灯现场
+   ============================================================ */
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* 演出中（聚光灯亮起时） */
+const PERF_TALKS = [
+  '看山已就位。先说好：笑点不够，看山要收版权费。',
+  '全场安静，看山能听到自己的心跳，还有你段子里的破绽。',
+  '看山掏出小本本：开始记录今晚的「笑点犯罪现场」。',
+  '这个开场有点东西——前提是后面还有东西。',
+  '观众屏住呼吸，看山屏住吐槽，大家都忍得很辛苦。',
+];
+
+/* 捧哏接梗轮次吐槽 */
+const ROUND_TALKS = {
+  first:  ['第一口咬下去了，有脆感，看山很欣慰。', '起手有范儿，看山默默把「毒舌」调低了一档。', '看山尝了一口：嗯，是段子的味道，不是面粉。'],
+  second: ['又接住一轮，看山怀疑你昨晚偷看了师傅的笔记。', '连续两轮不掉链子，看山把吐槽收回了半句。', '这轮比上轮稳，看山的血压也稳了。'],
+  third:  ['三连接梗！看山宣布：你暂时免于「冷场追责」。', '三连达成，看山开始怀疑这是不是提前写好的剧本。', '够劲，看山这次是真笑场了，扣它自己的形象分。'],
+};
+
+/* 赛后快评（按笑果分档） */
+const REACT_TALKS = {
+  high: ['看山宣布：这是今晚的 MVP，不接受反驳。', '笑点密度超标，建议打包去春晚试试水。', '观众笑了，看山笑得更凶，还偷偷抄了笔记。', '全场都笑了，只有看山在怀疑：这梗是不是偷了我的？'],
+  mid:  ['笑了一半，剩下的一半在等下一句。', '有那味儿了，但差一个「但是」。', '观众在犹豫要不要笑，看山替你犹豫了。', '不高不低，像极了看山的发际线——还有救，但得抓紧。'],
+  low:  ['看山尽力了，笑不出来，抱歉。', '冷场不可怕，可怕的是看山都救不了场。', '这段建议投放深夜电台，助眠效果一流。', '观众没笑，看山也没笑，只有尴尬笑了。'],
+};
+
+/* 跑票观察（{n} 会被替换成跑票人数） */
+const RUNOFF_TALKS = [
+  '{n} 位评审倒戈，这哪是说段子，这是传销。',
+  '跑票的人比鼓掌的人还多，这场跑票大戏比段子精彩。',
+  '{n} 人临阵倒戈，看山提醒：说服力这么强，建议去卖保险。',
+  '看山数了数票：{n} 人站到了你这边，剩下的在观望，像极了墙头草。',
+];
+
+/* 爆灯现场（{n} 会被替换成爆灯数） */
+const LIGHT_TALKS = [
+  '{n} 盏灯同时亮起，看山的墨镜都挡不住这亮度。',
+  '导师爆灯了！看山起立鼓掌——虽然是坐着站的。',
+  '{n} 盏灯全亮，看山建议导师们冷静，但灯都亮了，就当工伤吧。',
+  '爆灯！看山当场把「毒舌导师」的灯也偷偷按亮了，但没人看见。',
+];
+
+/* 赛后按时间线自动连发 */
+function kanshanAutoComments(res, vote, lightCount) {
+  const level = res.haha >= 62 ? 'high' : res.haha >= 40 ? 'mid' : 'low';
+  const talks = [{ delay: 300, label: '看山 · 赛后快评', msg: pick(REACT_TALKS[level]) }];
+  if (vote.moved > 0) talks.push({ delay: 1500, label: '看山 · 跑票观察', msg: pick(RUNOFF_TALKS).replace('{n}', vote.moved) });
+  if (lightCount > 0) talks.push({ delay: 2600, label: '看山 · 爆灯现场', msg: pick(LIGHT_TALKS).replace('{n}', lightCount) });
+  talks.forEach(t => setTimeout(() => addKanshanBubble(t.msg, t.label), t.delay));
+}
+
+/* 看山式追问：按结构特征递新梗 */
+function pickKanshanProd(r) {
+  const s = r.structure;
+  if (s.twist && !s.long) return '转折有了，但铺垫刚起步就刹车，包袱没垫稳。给前面补一句「后来我才发现」，把落差垫起来——再来一轮？';
+  if (!s.twist && s.long) return '铺垫铺了三条街，结果没有转折，观众血压都没起来。加一个「但是」，让全场来个急转弯——再来一轮？';
+  if (!s.twist) return '你这是平铺直叙，观众在台下已经开始神游了。给包袱加个「没想到」，让它原地起飞——再来一轮？';
+  if (s.exclaim) return '情绪很足，但包袱抖得太满，观众笑完就忘。留半口气别全说完，让笑点有回味——再来一轮？';
+  return '有点味道了，但还差最后一口气。把最扎心的那句再加工一下，观众就绷不住了——再来一轮？';
+}
+
+/* 看山式结构点评（结算时的人话，不是 ✅❌ 盖章） */
+function kanshanSay(res, vote, lightCount) {
+  const s = res.structure;
+  const twistTxt = s.twist ? '转折是有的，' : '转折缺一味，';
+  const longTxt = s.long ? '铺垫够足，' : '铺垫短了点，';
+  const exTxt = s.exclaim ? '情绪也顶起来了。' : '情绪略平。';
+  let core;
+  if (res.haha >= 62) core = '看山点头：这个包袱有三层结构，不是本能的搞笑，是设计过的搞笑，有东西。';
+  else if (res.haha >= 40) core = '看山扶了扶眼镜：结构在线，但爆点还能更「意外」一点。差的那一点，就是你下一场的天花板。';
+  else core = '看山叹了口气：这不是段子的问题，是节奏的问题。冷场是给下一次爆笑铺路，别急着退场。';
+  const voteTxt = vote.moved > 0 ? `看山亲眼看到 <b>${vote.moved}</b> 位评审倒戈跑票` : '全场评审纹丝不动，看山替你捏把汗';
+  const lightTxt = lightCount > 0 ? `，还爆了 ${lightCount} 盏导师灯` : '';
+  return `${twistTxt}${longTxt}${exTxt}<br>${core}<br>${voteTxt}${lightTxt}——结构检测完毕。`;
+}
+
+/* ---------- 段子分析（大众评审 + AI 结构检测） ---------- */
+function analyze(input) {
+  let haha = 30 + Math.floor(Math.random() * 25);          // 基础笑点
+  const markers = ['但是','结果','没想到','然后','突然','却','居然','毕竟','关键','最','只有','连'];
+  const hasTwist = markers.some(m => input.includes(m));   // 转折结构
+  const isLong = input.length >= 18;                        // 有铺垫
+  const hasExclaim = input.includes('！') || input.includes('!');
+  const isQ = currentMode === 'kb' ? currentData.words.every(w => input.includes(w)) : true;
+
+  if (hasTwist) haha += 15;      // AI：检测到转折结构
+  if (isLong) haha += 8;         // AI：铺垫充足
+  if (hasExclaim) haha += 5;     // AI：情绪爆发点
+  if (isQ) haha += 10;           // 知识梗：限定词全用上
+  else haha -= 25;               // 缺词重罚
+
+  haha = Math.max(8, Math.min(96, haha));
+  const cold = Math.max(4, Math.min(45, 100 - haha - 20 + Math.floor(Math.random()*8)));
+  const absurd = 100 - haha - cold;
+
+  let gain, comment, tier;
+  if (haha >= 62) {
+    tier = '🔥'; gain = 25 + Math.floor(Math.random()*15);
+    comment = PRAISE[Math.floor(Math.random()*PRAISE.length)] + '<br>' + TRANSFER;
+  } else if (haha >= 40) {
+    tier = '🙂'; gain = 12 + Math.floor(Math.random()*8);
+    comment = MEDIUM[Math.floor(Math.random()*MEDIUM.length)];  // 结构细节交给看山点评
+  } else {
+    tier = '🥶'; gain = 5;
+    comment = COLD[Math.floor(Math.random()*COLD.length)];
+  }
+  return { haha, absurd, cold, gain, comment, tier,
+    structure: { twist: hasTwist, long: isLong, exclaim: hasExclaim } };
+}
+
+/* ============================================================
+   奇葩说式投票：赛前押注 → 表演 → 终局投票 → 跑票结算
+   跑票 = 立场翻转人数，是段子说服力的硬指标
+   ============================================================ */
+function runoffVote(haha) {
+  // 赛前：100 位评审押注「好笑」35~55 人，其余押「冷场」
+  const preHaha = 35 + Math.floor(Math.random() * 21);
+  const preCold = 100 - preHaha;
+  const laughRate = haha / 100;
+
+  // 押「好笑」的人里有多少 stay 住（继续觉得好笑）
+  const stay = Math.round(preHaha * (0.35 + laughRate * 0.65));
+  // 押「冷场」的人里有多少被说服倒戈
+  const converted = Math.round(preCold * Math.max(0, laughRate * 1.35 - 0.12));
+
+  const postHaha = Math.min(100, stay + converted);
+  const postCold = 100 - postHaha;
+  const moved = Math.abs(postHaha - preHaha);   // 总跑票人数
+  return { preHaha, preCold, postHaha, postCold, moved, converted };
+}
+
+function showRunoff(v) {
+  $('roPreHaha').textContent = v.preHaha + ' 人';
+  $('roPreCold').textContent = v.preCold + ' 人';
+  $('roPostHaha').textContent = v.postHaha + ' 人';
+  $('roPostCold').textContent = v.postCold + ' 人';
+  $('runoffResult').innerHTML =
+    `你的段子把 <span class="moved">${v.moved}</span> 位评审拉了过来` +
+    `（其中 ${v.converted} 位从「押冷场」倒戈）→ 跑票积分 <b class="bonus">+${Math.round(v.moved * 0.6)}</b>`;
+  $('runoffWrap').classList.add('show');
+}
+
+/* ---------- 导师评审团 ---------- */
+const MENTORS = [
+  { emo: '🐸', name: '毒舌导师', quotes: [
+    '这梗讲得比我前男友还难伺候：铺垫三百年，爆点一秒。',
+    '我笑了，但笑的是你努力表演的样子。',
+    '笑点被你说成了失踪人口，建议立案。',
+    '犀利是够犀利，就是心也够黑——不过我喜欢。'] },
+  { emo: '🌙', name: '共情导师', quotes: [
+    '我懂，这就是当代年轻人，笑着笑着就哭了。',
+    '这哪是段子，这是纪录片，我看到了我自己。',
+    '扎心了，这种自嘲里有生活的质感。',
+    '我共情到了那个周一早上爬不起来的人——就是我。'] },
+  { emo: '🧠', name: '逻辑导师', quotes: [
+    '铺垫-转折-爆点结构完整，建议爆点再往前挪 15%。',
+    '你的类比维度很清奇，逻辑自洽，高级笑点。',
+    '有一处偷换概念被我抓到了，但效果不错，放过你。',
+    '转折频率合格，能自圆其说，逻辑上我投你一票。'] },
+];
+function mentorJudges(haha) {
+  return MENTORS.map(m => {
+    const quote = m.quotes[Math.floor(Math.random() * m.quotes.length)];
+    let light = false;
+    if (haha >= 62) light = Math.random() < 0.72;   // 爆梗：导师大概率爆灯
+    else if (haha >= 40) light = Math.random() < 0.35;
+    else light = Math.random() < 0.08;
+    return { emo: m.emo, name: m.name, quote, light };
+  });
+}
+function renderMentors(list) {
+  const row = $('mentorRow');
+  row.innerHTML = list.map((m, i) => `
+    <div class="mentor-card">
+      <div class="mentor-top"><div class="mentor-avatar">${m.emo}</div><div class="mentor-name">${m.name}</div></div>
+      <div class="mentor-quote">${m.quote}</div>
+      <div class="mentor-vote ${m.light ? 'light' : 'no'}"
+           style="${m.light ? 'animation-delay:' + (0.2 + i * 0.35) + 's' : ''}">
+        ${m.light ? '🧨 一键爆灯！' : '✋ 不爆灯'}
+      </div>
+    </div>`).join('');
+  $('mentors').classList.add('show');
+}
+
+/* ---------- 观众反应动画 ---------- */
+function spawnReactions(res) {
+  const rail = $('reactionRail');
+  const total = 12;
+  const emojis = Array(res.haha).fill('😂').concat(Array(res.absurd).fill('🤡')).concat(Array(res.cold).fill('🥶'));
+  for (let i = 0; i < total; i++) {
+    const e = document.createElement('span');
+    e.className = 'fly';
+    e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    e.style.left = (8 + Math.random() * 55) + '%';
+    e.style.animationDelay = (Math.random() * 0.4) + 's';
+    rail.appendChild(e);
+    setTimeout(() => e.remove(), 1600);
+  }
+}
+
+/* ---------- 积分 & 段位 ---------- */
+function updateScoreBar() {
+  $('score').textContent = score;
+  renderLevel();
+}
+function renderLevel() {
+  let cur = LEVELS[0];
+  for (const L of LEVELS) if (score >= L.min) cur = L;
+  const next = LEVELS[LEVELS.indexOf(cur)+1];
+  $('levelName').textContent = cur.name;
+  $('levelName2').textContent = cur.name;
+  $('levelBadge').textContent = cur.emo;
+  if (next) {
+    const pct = Math.min(100, Math.round((score - cur.min) / (next.min - cur.min) * 100));
+    $('levelFill').style.width = pct + '%';
+    $('levelProgress').textContent = `再赚 ${next.min - score} 分晋升「${next.name}」`;
+  } else {
+    $('levelFill').style.width = '100%';
+    $('levelProgress').textContent = '已达最高段位，人间已经容不下你的梗了 👑';
+  }
+}
+
+/* ---------- 打卡 ---------- */
+function renderStreak() {
+  const wrap = $('streakDays');
+  wrap.innerHTML = '';
+  const labels = ['周一','周二','周三','周四','周五','周六','周日'];
+  for (let i = 0; i < 7; i++) {
+    const d = document.createElement('div');
+    d.className = 'day' + (i < streak ? ' done' : '');
+    d.innerHTML = `<span class="day-emo">${i < streak ? '✅' : '📆'}</span><span class="day-label">${labels[i]}</span>`;
+    wrap.appendChild(d);
+  }
+}
+function checkStreak() {
+  const today = new Date().toDateString();
+  if (lastPlayDate !== today) {
+    streak++;
+    if (streak > 7) streak = 7;
+    localStorage.setItem('ts_streak', String(streak));
+    localStorage.setItem('ts_lastdate', today);
+    renderStreak();
+    if (streak === 7) showToast('🎖️ 7 天全勤！解锁限定徽章「段子永动机」');
+    else showToast('✅ 今日打卡 +1，连续 ' + streak + ' 天');
+  }
+}
+
+/* ---------- 发布想法（内容反哺） ---------- */
+function publishJoke() {
+  const btn = document.querySelector('#publishArea .btn-sm');
+  btn.textContent = '✅ 已发布 · 收获 87 个赞同';
+  btn.classList.add('done');
+  showToast('🚀 想法已发布，段子成为你的内容资产（赞同 87 · 评论 12）');
+}
+
+/* ============================================================
+   自定义命题：我的舞台我做主
+   ============================================================ */
+function addCustomTopic() {
+  const v = $('customTopicInput').value.trim();
+  if (!v) { showToast('先输入你的命题 ✍️'); $('customTopicInput').focus(); return; }
+  const t = { emoji:'✍️', kicker:'自定义命题 · 你说了算', topic:v, desc:'你的命题，你的段子，观众来投票', example:'', words:[], custom:true };
+  customTopics.unshift(t);
+  if (customTopics.length > 20) customTopics.pop();
+  localStorage.setItem('ts_custom_topics', JSON.stringify(customTopics));
+  currentData = t;
+  $('customTopicInput').value = '';
+  renderStage();
+  addKanshanBubble(`命题成立：<b>「${v}」</b><br><br>这是你的舞台，你的规则。看山备好毒舌，就等你上场。`, '看山 · 接令');
+}
+
+function pickCustomTopic(i) {
+  currentData = customTopics[i];
+  renderStage();
+}
+
+function renderCustomChips() {
+  const wrap = $('customTopicChips');
+  wrap.innerHTML = '';
+  if (!customTopics.length) {
+    wrap.innerHTML = '<span class="cta-chip" style="opacity:.55">还没有自定义命题，先设定一个 ✍️</span>';
+    return;
+  }
+  customTopics.forEach((t, i) => {
+    const c = document.createElement('button');
+    c.className = 'cta-chip' + (currentData === t ? ' on' : '');
+    c.textContent = t.topic;
+    c.onclick = () => pickCustomTopic(i);
+    wrap.appendChild(c);
+  });
+}
+
+/* ============================================================
+   段子排行榜 + 自由投票
+   ============================================================ */
+function heatOf(e) { return e.haha + (e.votes.haha||0)*2 + (e.votes.absurd||0) - (e.votes.cold||0); }
+
+function modeNameOf(m) {
+  return { topic:'今日热梗', identity:'身份盲盒', opener:'捧哏接梗', kb:'知识梗擂台', custom:'自定义命题', zb:'💥爆梗场' }[m] || '脱口秀';
+}
+
+/* 演出结束把段子记进排行榜（本地持久化） */
+function recordJoke(input, res) {
+  const e = { id:'u'+Date.now(), text:input, haha:res.haha, mode:currentMode,
+              ts:Date.now(), votes:{haha:0, absurd:0, cold:0}, mine:true };
+  lb.unshift(e);
+  if (lb.length > 40) lb.pop();
+  localStorage.setItem('ts_leaderboard', JSON.stringify(lb));
+  lastEntryId = e.id;
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const list = $('lbList');
+  const mine = lbTabNow === 'mine';
+  // 热梗榜 = 表演段子 + 种子热梗 + 爆梗场收录（收录的爆梗自带 heatOf）
+  const bombs = zhihuBombs.map(b => ({ id: b.id, text: b.text, haha: 88, mode: 'zb', votes: b.votes, mine: false }));
+  const entries = mine
+    ? lb.filter(e => e.mine)
+    : [...lb, ...SEED_LB.filter(s => !lb.some(e => e.id === s.id)), ...bombs];
+  entries.sort((a, b) => heatOf(b) - heatOf(a));
+  const top = entries.slice(0, 10);
+  if (!top.length) {
+    list.innerHTML = '<div class="lb-empty">还没有你的爆梗，先上场讲一段 🎤</div>';
+    return;
+  }
+  const maxHeat = Math.max(...top.map(heatOf), 1);
+  list.innerHTML = top.map((e, i) => {
+    const rank = i < 3 ? ['🥇','🥈','🥉'][i] : (i + 1);
+    const v = e.votes;
+    const totalVotes = (v.haha||0) + (v.absurd||0) + (v.cold||0);
+    const heat = heatOf(e);
+    const pct = Math.max(Math.round(heat / maxHeat * 100), 4);
+    return `<div class="lb-row${e.mine ? ' mine' : ''}${i < 3 ? ' top' + (i + 1) : ''}">
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-main">
+        <div class="lb-text">${e.text.length > 46 ? e.text.slice(0, 46) + '…' : e.text}</div>
+        <div class="lb-meta">${modeNameOf(e.mode)} · 笑果 ${e.haha}%${e.haha >= 62 ? ' <b class="bomb">💥爆梗</b>' : ''}${e.mine ? ' · 我的' : ''} · 🗳️ ${totalVotes} 票</div>
+        <div class="lb-heatbar"><div class="lb-heatfill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="lb-heat">🔥 ${heat}</div>
+    </div>`;
+  }).join('');
+}
+
+function lbTab(t) {
+  lbTabNow = t;
+  document.querySelectorAll('.lb-tab').forEach(b => b.classList.toggle('active', b.dataset.lb === t));
+  renderLeaderboard();
+}
+
+/* ============================================================
+   爆梗场 · 知乎划线选摘 → 蓝标收录
+   ============================================================ */
+const BOMB_YARD_EMPTY = '<div class="zb-empty">还没有爆梗入库 —— 去上方知乎回答里<b>划线选中</b>一句神回复 👆<br>（划完松开鼠标，点蓝色「💥 收录为爆梗」）</div>';
+
+function renderZbList() {
+  const list = $('zbList');
+  if (!zhihuBombs.length) { list.innerHTML = BOMB_YARD_EMPTY; return; }
+  list.innerHTML = zhihuBombs.slice(0, 6).map((e, i) => {
+    const rank = i < 3 ? ['🥇','🥈','🥉'][i] : (i + 1);
+    const v = e.votes;
+    const on = t => (e.myVote === t ? ' on' : '');
+    return `<div class="zb-item">
+      <div class="zb-rank">${rank}</div>
+      <div class="zb-main">
+        <div class="zb-text">${e.text}</div>
+        <div class="zb-acts">
+          <button class="zb-vote haha${on('haha')}" onclick="zbVote('${e.id}','haha')">😂 ${v.haha||0}</button>
+          <button class="zb-vote absurd${on('absurd')}" onclick="zbVote('${e.id}','absurd')">🤡 ${v.absurd||0}</button>
+          <button class="zb-vote cold${on('cold')}" onclick="zbVote('${e.id}','cold')">🥶 ${v.cold||0}</button>
+          <button class="zb-use" onclick="zbUseAsTopic('${e.id}')">✍️ 用作命题</button>
+        </div>
+      </div>
+      <div class="zb-heat">${heatOf(e)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* 划线检测：只在知乎回答文本内生效，弹出蓝色按钮 */
+document.addEventListener('mouseup', () => {
+  setTimeout(() => {
+    const sel = window.getSelection();
+    const txt = sel ? sel.toString().trim() : '';
+    if (!txt || txt.length < 4 || txt.length > 60) { hideSelPop(); return; }
+    // 判断选区是否在知乎回答文本内
+    const node = sel.anchorNode;
+    if (!node || !node.parentElement) { hideSelPop(); return; }
+    const inAnswer = node.parentElement.closest && node.parentElement.closest('.zhihu-answer-text');
+    if (!inAnswer) { hideSelPop(); return; }
+    // 记录文本 + 定位按钮
+    selPopText = txt;
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    selPopAnchor = rect;
+    const pop = $('zhSelPop');
+    pop.style.display = 'block';
+    pop.style.left = (rect.left + rect.width / 2) + 'px';
+    pop.style.top = rect.top + 'px';
+  }, 10);
+});
+
+function hideSelPop() {
+  const pop = $('zhSelPop');
+  if (pop) pop.style.display = 'none';
+}
+
+/* 滚动/点击别处时收起按钮 */
+document.addEventListener('scroll', hideSelPop, true);
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest || !e.target.closest('#zhSelPop')) hideSelPop();
+});
+window.addEventListener('resize', hideSelPop);
+
+/* 收录：划线的句子进爆梗场 */
+function collectZhihuBomb() {
+  if (!selPopText) return;
+  const e = {
+    id: 'zb' + Date.now(),
+    text: selPopText,
+    votes: { haha: 0, absurd: 0, cold: 0 },
+    ts: Date.now(),
+    myVote: null,
+  };
+  zhihuBombs.unshift(e);
+  if (zhihuBombs.length > 40) zhihuBombs.pop();
+  localStorage.setItem('ts_zhihu_bombs', JSON.stringify(zhihuBombs));
+  renderZbList();
+  hideSelPop();
+  window.getSelection().removeAllRanges();
+  showToast('💥 已收录进爆梗场，快去投票或用作命题');
+  addKanshanBubble(`看山刷到一条好梗：<b>「${e.text.length > 28 ? e.text.slice(0, 28) + '…' : e.text}」</b><br><br>已收录进爆梗场。你可以给它投票让它冲热梗榜，也可以<b>「用作命题」</b>——拿别人的爆梗，写你自己的段子。`, '看山 · 爆梗场收录');
+  bombPulse();
+}
+
+/* 收录时的小火花 */
+function bombPulse() {
+  const b = $('bombOverlay');
+  b.classList.remove('show'); void b.offsetWidth;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 900);
+}
+
+/* 爆梗场投票 */
+function zbVote(id, type) {
+  const e = zhihuBombs.find(x => x.id === id);
+  if (!e) return;
+  if (e.myVote) { showToast('你已经投过这条了 😉'); return; }
+  e.myVote = type;
+  e.votes[type] = (e.votes[type] || 0) + 1;
+  localStorage.setItem('ts_zhihu_bombs', JSON.stringify(zhihuBombs));
+  renderZbList();
+  const label = { haha:'😂 好笑', absurd:'🤡 离谱', cold:'🥶 冷场' }[type];
+  showToast('你为这条爆梗投了「' + label + '」，热度 +' + (type === 'haha' ? 2 : type === 'absurd' ? 1 : -1));
+  addKanshanBubble({ haha:'这条有爆相，你的眼光，看山认可。', absurd:'离谱？？也行，离谱自有离谱的道理。', cold:'冷场？你确定不是你的幽默感没上线？' }[type], '看山 · 爆梗场');
+}
+
+/* 爆梗场素材 → 用作命题（进自定义命题池） */
+function zbUseAsTopic(id) {
+  const e = zhihuBombs.find(x => x.id === id);
+  if (!e) return;
+  const t = {
+    emoji:'💥', kicker:'爆梗场 · 命题素材', topic:'把「' + (e.text.length > 20 ? e.text.slice(0, 20) + '…' : e.text) + '」讲成你自己的爆梗',
+    desc:'素材来自知乎爆梗场，用你的方式再创作', example:'', words:[], custom:true,
+  };
+  customTopics.unshift(t);
+  if (customTopics.length > 20) customTopics.pop();
+  localStorage.setItem('ts_custom_topics', JSON.stringify(customTopics));
+  // 切到自定义命题模式并选中它
+  setMode('custom', true);
+  currentData = t;
+  renderStage();
+  showToast('💥 爆梗素材已设为命题，接招吧！');
+  addKanshanBubble(`看山把爆梗场素材做成命题了：<b>「${t.topic}」</b><br><br>别人的爆梗，是你的命题。讲得比它还爆，你就赢了。`, '看山 · 命题接令');
+}
+
+/* 观众自由投票：计入当前段子热度 */
+function freeVote(type) {
+  if (!lastEntryId) { showToast('先上场讲一段，才有段子可投 🎤'); return; }
+  const e = lb.find(x => x.id === lastEntryId);
+  if (!e) { showToast('这条段子已过期，再讲一段来投 🎤'); return; }
+  if (e.voted) { showToast('你已经投过这一票了，公平起见不能反悔 😉'); return; }
+  e.voted = type;
+  e.votes[type] = (e.votes[type] || 0) + 1;
+  localStorage.setItem('ts_leaderboard', JSON.stringify(lb));
+  renderLeaderboard();
+  const label = { haha:'😂 好笑', absurd:'🤡 离谱', cold:'🥶 冷场' }[type];
+  showToast('你的票已计入段子排行榜：' + label);
+  addKanshanBubble(
+    { haha:'这一票投给自己的「好笑」，这份自信，看山欣赏。',
+      absurd:'投「离谱」？！行，离谱也是一种真诚。',
+      cold:'投「冷场」？！你是想让自己的段子上尴尬榜吗。' }[type],
+    '看山 · 自由投票');
+}
+
+/* 💥 爆梗时刻：全屏特效 + 看山吐槽 */
+const BOMB_TALKS = [
+  '💥 爆梗！看山宣布：这不是段子，这是弹药。',
+  '💥 爆梗时刻！观众笑到缺氧，看山已拨 120 备用。',
+  '💥 这梗炸了，全场评审集体阵亡，看山现在替他们收尸。',
+  '💥 爆梗！看山连夜把这句话抄进「传家宝」文件夹。',
+];
+function bombMoment(haha) {
+  const ov = $('bombOverlay');
+  ov.classList.remove('show'); void ov.offsetWidth;
+  ov.classList.add('show');
+  setTimeout(() => ov.classList.remove('show'), 1700);
+  addKanshanBubble(pick(BOMB_TALKS), '看山 · 💥 爆梗时刻');
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+init();
+</script>
+</body>
+</html>
